@@ -11,10 +11,7 @@ namespace CPSC411.Lexer
     {
         private readonly IDictionary<string, TokenParser> _ruleDictionary;
         private readonly ICollection<IToken> _tokens;
-        private string _slcPattern = @"";
-
-        private string _multiLineStartPattern = @"";
-        private string _multiLineEndPattern = @"";
+        private readonly string _slcPattern = @"%.*\n";
 
         public delegate IToken TokenParser(string tokenString);
 
@@ -32,30 +29,75 @@ namespace CPSC411.Lexer
             return this;
         }
 
-        public Lexer SetSingleLineCommentToken(string pattern)
+        public string StripComments(string sourceString)
         {
-            _slcPattern = @"^" + pattern + @".*\n\s*";
-            return this;
+            return StripMultiLineComments(
+                StripSingleLineComments(sourceString)).Trim();
         }
 
-        public Lexer SetMultiLineCommentTokens(string beginPattern, string endPattern)
+        private string StripSingleLineComments(string sourceString)
         {
-            _multiLineStartPattern = "^" + beginPattern;
-            _multiLineEndPattern = endPattern + @"\s*";
+            var slcRegex = new Regex(_slcPattern);
+            while (slcRegex.IsMatch(sourceString))
+            {
+                Console.WriteLine("Found SLC");
+                sourceString = slcRegex.Replace(sourceString, "\n");
+            }
+            return sourceString;
+        }
 
-            return this;
+        private string StripMultiLineComments(string sourceString)
+        {
+            int commentDepth = 0;
+            int commentStart = -1;
+            int index = 1;
+
+
+
+            while (index < sourceString.Length)
+            {
+                if (sourceString[index] == '*') // potential start of comment
+                {
+                    if (sourceString[index - 1] == '/') // looks like it is
+                    {
+                        commentDepth ++;
+
+                        if (commentDepth == 1)
+                        {
+                            // start of a comment block
+                            commentStart = index;
+                        }
+                    }
+                }
+                else if (sourceString[index] == '/') // possible comment close
+                {
+                    if (sourceString[index - 1] == '*') // looks like it is
+                    {
+                        commentDepth --;
+
+                        if (commentDepth == 0)
+                        {
+                            // found the end of a comment block
+                            // need to remove the substring of the comments
+                            var stringStart = sourceString.Substring(0, commentStart-1);
+                            var stringEnd = sourceString.Substring(index + 1);
+                            
+                            // 
+                            sourceString = stringStart + " " + stringEnd;
+                            index = commentStart+1;
+                        }
+                    }
+                }
+                index ++;
+            }
+
+            return sourceString;
         }
 
         public string ParseToken(string tokenString)
         {
-            tokenString = TrimComments(tokenString);
-
-            if (tokenString == "")
-            {
-                return "";
-            }
-
-            var rule = _ruleDictionary.FirstOrDefault(r => Regex.IsMatch(tokenString, r.Key, RegexOptions.Singleline));
+            var rule = _ruleDictionary.FirstOrDefault(
+                r => Regex.IsMatch(tokenString, r.Key, RegexOptions.Singleline));
 
             if (rule.Value == null)
             {
@@ -67,21 +109,6 @@ namespace CPSC411.Lexer
             Console.WriteLine($" *** Adding {token.StringRepresentation}");
 
             return Regex.Replace(tokenString, rule.Key, "").Trim();
-        }
-
-        private string TrimComments(string tokenString)
-        {
-            if (Regex.IsMatch(tokenString, _slcPattern))
-            {
-                Console.WriteLine($" *** Dropping single line comment '{Regex.Match(tokenString, _slcPattern).Value}'");
-                return TrimComments((Regex.Replace(tokenString, _slcPattern, "")));
-            }
-            if (Regex.IsMatch(tokenString, _multiLineStartPattern, RegexOptions.Singleline))
-            {
-                Console.WriteLine(" *** Removing Multiline Comment");
-                return TrimComments(Regex.Replace(tokenString, $"{_multiLineStartPattern}.*{_multiLineEndPattern}", "", RegexOptions.Singleline));
-            }
-            return tokenString;
         }
 
         public IEnumerable<IToken> GetTokens()
