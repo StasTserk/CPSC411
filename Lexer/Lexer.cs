@@ -11,10 +11,10 @@ namespace CPSC411.Lexer
     {
         private readonly IDictionary<string, TokenParser> _ruleDictionary;
         private readonly ICollection<IToken> _tokens;
-        private string _slcPattern = @"^\%";
+        private string _slcPattern = @"";
 
-        private string _multiLineStartPattern = @"^\/\*";
-        private string _multiLineEndPattern = @"\*\/\s*";
+        private string _multiLineStartPattern = @"";
+        private string _multiLineEndPattern = @"";
 
         public delegate IToken TokenParser(string tokenString);
 
@@ -34,14 +34,14 @@ namespace CPSC411.Lexer
 
         public Lexer SetSingleLineCommentToken(string pattern)
         {
-            _slcPattern = @"^" + pattern;
+            _slcPattern = @"^" + pattern + @".*\n\s*";
             return this;
         }
 
         public Lexer SetMultiLineCommentTokens(string beginPattern, string endPattern)
         {
             _multiLineStartPattern = "^" + beginPattern;
-            _multiLineEndPattern = endPattern + @"\s+";
+            _multiLineEndPattern = endPattern + @"\s*";
 
             return this;
         }
@@ -59,7 +59,7 @@ namespace CPSC411.Lexer
 
             if (rule.Value == null)
             {
-                throw new InvalidDataException($"Invalid token at {tokenString}");
+                throw new InvalidDataException($"Invalid token at '{tokenString.Split(' ')[0]}'");
             }
 
             var token = rule.Value(Regex.Match(tokenString, rule.Key, RegexOptions.Singleline).Value);
@@ -71,15 +71,15 @@ namespace CPSC411.Lexer
 
         private string TrimComments(string tokenString)
         {
-            if (Regex.IsMatch(tokenString, _slcPattern, RegexOptions.Singleline))
+            if (Regex.IsMatch(tokenString, _slcPattern))
             {
-                Console.WriteLine(" *** Dropping single line comment");
-                return (Regex.Replace(tokenString, _slcPattern + @".*\n?\s*", ""));
+                Console.WriteLine($" *** Dropping single line comment '{Regex.Match(tokenString, _slcPattern).Value}'");
+                return TrimComments((Regex.Replace(tokenString, _slcPattern, "")));
             }
             if (Regex.IsMatch(tokenString, _multiLineStartPattern, RegexOptions.Singleline))
             {
                 Console.WriteLine(" *** Removing Multiline Comment");
-                return Regex.Replace(tokenString, $"{_multiLineStartPattern}.*{_multiLineEndPattern}", "", RegexOptions.Singleline);
+                return TrimComments(Regex.Replace(tokenString, $"{_multiLineStartPattern}.*{_multiLineEndPattern}", "", RegexOptions.Singleline));
             }
             return tokenString;
         }

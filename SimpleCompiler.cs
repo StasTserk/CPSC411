@@ -7,7 +7,7 @@ namespace CPSC411
     {
         static void Main(string[] args)
         {
-            var sourceString = "17x17x17x17 %single line comment\n  \n \nif test :=4 /* some multiline \n comments */ \n\n4 + 4";
+            var sourceString = System.IO.File.ReadAllText("file.txt").Trim();
 
             var lexer = new Lexer.Lexer();
 
@@ -15,7 +15,7 @@ namespace CPSC411
 
             while (sourceString.Length != 0)
             {
-                Console.WriteLine(sourceString);
+                //Console.WriteLine(sourceString);
                 sourceString = lexer.ParseToken(sourceString);
             }
 
@@ -46,7 +46,9 @@ namespace CPSC411
                 .AddRule(@"/", s => new Token {StringRepresentation = "DIV"})
                 .AddRule(@"\(", s => new Token {StringRepresentation = "LPAR"})
                 .AddRule(@"\)", s => new Token {StringRepresentation = "RPAR"})
-                .AddRule(@";", s => new Token {StringRepresentation = "SEMICOLON"});
+                .AddRule(@";", s => new Token {StringRepresentation = "SEMICOLON"})
+                .SetSingleLineCommentToken("%")
+                .SetMultiLineCommentTokens(@"\/\*", @"\*\/");
         }
     }
 }
