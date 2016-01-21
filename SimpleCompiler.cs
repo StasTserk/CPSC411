@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using CPSC411.Lexer;
 
 namespace CPSC411
@@ -7,7 +8,7 @@ namespace CPSC411
     {
         static void Main(string[] args)
         {
-            var sourceString = System.IO.File.ReadAllText("file.txt").Trim();
+            var sourceString = GetSourceFileText(args);
 
             var lexer = new Lexer.Lexer();
 
@@ -27,6 +28,34 @@ namespace CPSC411
             Console.WriteLine();
         }
 
+        /// <summary>
+        /// Ingests the file based on the passed command line arguments.
+        /// If no filename is specified, picks a file randomly out of the ones given.
+        /// </summary>
+        /// <param name="args">Command line arguments</param>
+        /// <returns>String representing the complete text of the file.</returns>
+        private static string GetSourceFileText(string [] args)
+        {
+            var fileName = "";
+            if (args.Length != 0)
+            {
+                fileName = $"SampleFiles/{args[0]}";
+            }
+            else
+            {
+                var files = Directory.GetFiles("SampleFiles/");
+                var file = files[new Random().Next(files.Length)];
+                fileName = file.ToString();
+            }
+
+            Console.WriteLine($"Reading {fileName}");
+            return System.IO.File.ReadAllText(fileName).Trim();
+        }
+
+        /// <summary>
+        /// Adds all of the rules associated with assignment 1
+        /// </summary>
+        /// <param name="lexer">Lexer that is going to be performing the analysis</param>
         private static void AddRules(Lexer.Lexer lexer)
         {
             lexer.AddRule(@"if\b+", 
