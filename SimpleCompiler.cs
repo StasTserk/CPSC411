@@ -29,23 +29,23 @@ namespace CPSC411
 
         private static void AddRules(Lexer.Lexer lexer)
         {
-            lexer.AddRule(@"if[\s]+", 
+            lexer.AddRule(@"if\b+", 
                 s => new Token {StringRepresentation = "IF"})
-                .AddRule(@"then[\s]+", 
+                .AddRule(@"then\b", 
                 s => new Token {StringRepresentation = "THEN"})
-                .AddRule(@"while[\s]+", 
+                .AddRule(@"while\b", 
                 s => new Token {StringRepresentation = "WHILE"})
-                .AddRule(@"do[\s]+", 
+                .AddRule(@"do\b", 
                 s => new Token {StringRepresentation = "DO"})
-                .AddRule(@"input[\s]+", 
+                .AddRule(@"input\b", 
                 s => new Token {StringRepresentation = "INPUT"})
-                .AddRule(@"else[\s]+", 
+                .AddRule(@"else\b", 
                 s => new Token {StringRepresentation = "ELSE"})
-                .AddRule(@"begin[\s]+", 
+                .AddRule(@"begin\b", 
                 s => new Token {StringRepresentation = "BEGIN"})
-                .AddRule(@"end[\s]+", 
+                .AddRule(@"end\b", 
                 s => new Token {StringRepresentation = "END"})
-                .AddRule(@"write[\s]+", 
+                .AddRule(@"write\b", 
                 s => new Token {StringRepresentation = "WRITE"})
                 .AddRule(@"[a-zA-Z][\w]*", 
                 s => new Token {StringRepresentation = $"Id({s})"})
