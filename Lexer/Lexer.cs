@@ -12,7 +12,7 @@ namespace CPSC411.Lexer
     {
         private readonly IDictionary<string, TokenParser> _ruleDictionary;
         private readonly ICollection<IToken> _tokens;
-        private readonly string _slcPattern = @"%.*\n";
+        private readonly string _slcPattern = @"\%[^\n]*\n";
 
         public delegate IToken TokenParser(string tokenString);
 
@@ -59,7 +59,7 @@ namespace CPSC411.Lexer
         public string StripComments(string sourceString)
         {
             return StripMultiLineComments(
-                StripSingleLineComments(sourceString)).Trim();
+                StripSingleLineComments(sourceString));
         }
 
         /// <summary>
@@ -69,12 +69,10 @@ namespace CPSC411.Lexer
         /// <returns></returns>
         private string StripSingleLineComments(string sourceString)
         {
-            var slcRegex = new Regex(_slcPattern);
-            while (slcRegex.IsMatch(sourceString))
-            {
-                Console.WriteLine("Found SLC");
-                sourceString = slcRegex.Replace(sourceString, "\n");
-            }
+            var slcRegex = new Regex(_slcPattern, RegexOptions.Multiline);
+
+            sourceString = slcRegex.Replace(sourceString, "\n");
+
             return sourceString;
         }
 
@@ -148,8 +146,9 @@ namespace CPSC411.Lexer
         /// the token that was parsed out.
         /// </summary>
         /// <param name="tokenString">string that is to be tokenized</param>
+        /// <param name="lineNumber">Line number on which the token appears</param>
         /// <returns>string not containing the token that was parsed out</returns>
-        public string ParseToken(string tokenString)
+        public string ParseToken(string tokenString, int lineNumber)
         {
             var rule = _ruleDictionary.FirstOrDefault(
                 r => Regex.IsMatch(tokenString, r.Key, RegexOptions.Singleline));
@@ -160,6 +159,7 @@ namespace CPSC411.Lexer
             }
 
             var token = rule.Value(Regex.Match(tokenString, rule.Key, RegexOptions.Singleline).Value);
+            token.LineNumber = lineNumber;
             _tokens.Add(token);
             Console.WriteLine($" *** Adding {token.StringRepresentation}");
 

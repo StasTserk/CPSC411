@@ -3,5 +3,6 @@
     public interface IToken
     {
         string StringRepresentation { get; }
+        int LineNumber { get; set; }
     }
 }

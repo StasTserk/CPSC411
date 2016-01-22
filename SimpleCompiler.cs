@@ -14,17 +14,24 @@ namespace CPSC411
 
             AddRules(lexer);
             sourceString = lexer.StripComments(sourceString);
+            var lineCount = 0;
 
-            while (sourceString.Length != 0)
+            foreach (var line in sourceString.Split('\n'))
             {
-                //Console.WriteLine(sourceString);
-                sourceString = lexer.ParseToken(sourceString);
+                var subLine = line.Trim();
+                while (subLine.Length != 0)
+                {
+                    //Console.WriteLine(sourceString);
+                    subLine = lexer.ParseToken(subLine, lineCount);
+                }
+                lineCount ++;
             }
 
             foreach (var token in lexer.GetTokens())
             {
-                Console.Write($"[{token.StringRepresentation}], ");
+                Console.WriteLine($"Line {token.LineNumber} - [{token.StringRepresentation}], ");
             }
+
             Console.WriteLine();
         }
 
@@ -58,7 +65,7 @@ namespace CPSC411
         /// <param name="lexer">Lexer that is going to be performing the analysis</param>
         private static void AddRules(Lexer.Lexer lexer)
         {
-            lexer.AddRule(@"if\b+", 
+            lexer.AddRule(@"if\b", 
                 s => new Token {StringRepresentation = "IF"})
                 .AddRule(@"then\b", 
                 s => new Token {StringRepresentation = "THEN"})
@@ -76,7 +83,7 @@ namespace CPSC411
                 s => new Token {StringRepresentation = "END"})
                 .AddRule(@"write\b", 
                 s => new Token {StringRepresentation = "WRITE"})
-                .AddRule(@"[a-zA-Z][\w]*", 
+                .AddRule(@"[a-zA-Z][a-zA-Z0-9_]*", 
                 s => new Token {StringRepresentation = $"Id({s})"})
                 .AddRule(@"[\d]+", 
                 s => new Token {StringRepresentation = $"Num({s})"})
