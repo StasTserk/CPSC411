@@ -13,11 +13,14 @@ namespace CPSC411.Lexer
         private readonly IDictionary<string, TokenParser> _ruleDictionary;
         private readonly ICollection<IToken> _tokens;
         private readonly string _slcPattern = @"\%[^\n]*\n";
+        private readonly LexerMode _mode;
 
+        // definition of method signiature for generating a token
         public delegate IToken TokenParser(string tokenString);
 
-        public Lexer()
+        public Lexer(LexerMode mode)
         {
+            _mode = mode;
             _ruleDictionary = new Dictionary<string, TokenParser>();
             _tokens = new List<IToken>();
         }
@@ -155,15 +158,23 @@ namespace CPSC411.Lexer
 
             if (rule.Value == null)
             {
-                throw new InvalidDataException($"Invalid token at '{tokenString.Split(' ')[0]}'");
+                throw new InvalidDataException($"Invalid token encountered at line {lineNumber} -  '{tokenString.Split(' ')[0]}'");
             }
 
             var token = rule.Value(Regex.Match(tokenString, rule.Key, RegexOptions.Singleline).Value);
             token.LineNumber = lineNumber;
             _tokens.Add(token);
-            Console.WriteLine($" *** Adding {token.StringRepresentation}");
 
+            Log($" *** Adding {token.StringRepresentation}");
             return Regex.Replace(tokenString, rule.Key, "").Trim();
+        }
+
+        private void Log(string s)
+        {
+            if (_mode == LexerMode.Verbose)
+            {
+                Console.WriteLine(s);
+            }
         }
 
         /// <summary>
@@ -173,6 +184,12 @@ namespace CPSC411.Lexer
         public IEnumerable<IToken> GetTokens()
         {
             return _tokens;
+        }
+
+        public enum LexerMode
+        {
+            None,
+            Verbose
         }
     }
 }

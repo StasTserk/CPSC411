@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using CPSC411.Lexer;
 
 namespace CPSC411
@@ -8,28 +9,37 @@ namespace CPSC411
     {
         static void Main(string[] args)
         {
+            // Loads input string from source file
             var sourceString = GetSourceFileText(args);
-
-            var lexer = new Lexer.Lexer();
+            var lexer = new Lexer.Lexer(Lexer.Lexer.LexerMode.None);
 
             AddRules(lexer);
             sourceString = lexer.StripComments(sourceString);
-            var lineCount = 0;
+            var lineCount = 1;
 
-            foreach (var line in sourceString.Split('\n'))
+            try
             {
-                var subLine = line.Trim();
-                while (subLine.Length != 0)
+                // Iterate through all lines of the code and extract tokens from them.
+                foreach (var line in sourceString.Split('\n').Select(line => line.Trim()))
                 {
-                    //Console.WriteLine(sourceString);
-                    subLine = lexer.ParseToken(subLine, lineCount);
+                    var subLine = line;
+                    while (subLine.Length != 0)
+                    {
+                        subLine = lexer.ParseToken(subLine, lineCount);
+                    }
+                    lineCount ++;
                 }
-                lineCount ++;
-            }
 
-            foreach (var token in lexer.GetTokens())
+                // after tokens are extracted, print the list of tokens
+                foreach (var token in lexer.GetTokens())
+                {
+                    Console.Write($"[{token.StringRepresentation}], ");
+                }
+            }
+            catch (InvalidDataException e)
             {
-                Console.WriteLine($"Line {token.LineNumber} - [{token.StringRepresentation}], ");
+                // Handle token parsing issues
+                Console.WriteLine($"Parse Error: {e.Message}");
             }
 
             Console.WriteLine();
@@ -83,7 +93,7 @@ namespace CPSC411
                 s => new Token {StringRepresentation = "END"})
                 .AddRule(@"write\b", 
                 s => new Token {StringRepresentation = "WRITE"})
-                .AddRule(@"[a-zA-Z][a-zA-Z0-9_]*", 
+                .AddRule(@"[a-zA-Z_][a-zA-Z0-9_]*", 
                 s => new Token {StringRepresentation = $"Id({s})"})
                 .AddRule(@"[\d]+", 
                 s => new Token {StringRepresentation = $"Num({s})"})
