@@ -56,13 +56,13 @@ namespace CPSC411
             var fileName = "";
             if (args.Length != 0)
             {
-                fileName = $"SampleFiles/{args[0]}";
+                fileName = $"{args[0]}";
             }
             else
             {
-                var files = Directory.GetFiles("SampleFiles/");
-                var file = files[new Random().Next(files.Length)];
-                fileName = file.ToString();
+                var files = Directory.GetFiles("./").Where(f=>f.EndsWith(".txt")).ToList();
+                var file = files[new Random().Next(files.Count)];
+                fileName = file;
             }
 
             Console.WriteLine($"Reading {fileName}");
