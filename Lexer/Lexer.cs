@@ -1,26 +1,49 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using CPSC411.Exceptions;
 
 namespace CPSC411.Lexer
 {
     public class Lexer
     {
+        /// <summary>
+        /// Dictionary containing a pattern for matching a token string and the delegate
+        /// that converts the text of the token to an IToken object
+        /// </summary>
         private readonly IDictionary<string, TokenParser> _ruleDictionary;
-        private readonly ICollection<IToken> _tokens;
-        private readonly string _slcPattern = @"\%[^\n]*\n";
-        private readonly LexerMode _mode;
 
-        // definition of method signiature for generating a token
+        /// <summary>
+        /// Private collection of all tokens that have been parsed in so far
+        /// </summary>
+        private readonly ICollection<IToken> _tokens;
+
+        /// <summary>
+        /// Pattern for matching single line comments
+        /// </summary>
+        private readonly string _slcPattern = @"\%[^\n]*\n";
+
+        /// <summary>
+        /// Mode determining wether or not the lexer should print to console
+        /// </summary>
+        private readonly LexerLoggingMode _loggingMode;
+
+        /// <summary>
+        /// Definition of method signiature for generating a token
+        /// </summary>
+        /// <param name="tokenString">String representing the token</param>
+        /// <returns>IToken object representing the token that was parsed out</returns>
         public delegate IToken TokenParser(string tokenString);
 
-        public Lexer(LexerMode mode)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="loggingMode">Wether or not the lexer should print to console as it works.</param>
+        public Lexer(LexerLoggingMode loggingMode)
         {
-            _mode = mode;
+            _loggingMode = loggingMode;
             _ruleDictionary = new Dictionary<string, TokenParser>();
             _tokens = new List<IToken>();
         }
@@ -153,25 +176,36 @@ namespace CPSC411.Lexer
         /// <returns>string not containing the token that was parsed out</returns>
         public string ParseToken(string tokenString, int lineNumber)
         {
+            // First we try to pull out a rule for generating a token by matching the pattern
+            // that is used as the key to the token string
             var rule = _ruleDictionary.FirstOrDefault(
                 r => Regex.IsMatch(tokenString, r.Key, RegexOptions.Singleline));
 
+            // if we fail to find a rule, that means we encountered a token we do not recognize
             if (rule.Value == null)
             {
-                throw new InvalidDataException($"Invalid token encountered at line {lineNumber} -  '{tokenString.Split(' ')[0]}'");
+                throw new InvalidTokenException($"Invalid token encountered at line {lineNumber} -  '{tokenString.Split(' ')[0]}'");
             }
 
+            // assuming we did encounter a recognizable token, we generate the token by invoking the
+            // rule's value - the delegate that produces the token given the token's substring
             var token = rule.Value(Regex.Match(tokenString, rule.Key, RegexOptions.Singleline).Value);
             token.LineNumber = lineNumber;
             _tokens.Add(token);
 
+            // after adding the token, we possibly log that we added to token and then pop
+            // the characters we consumed off of the string.
             Log($" *** Adding {token.StringRepresentation}");
             return Regex.Replace(tokenString, rule.Key, "").Trim();
         }
 
+        /// <summary>
+        /// Simple logging function that only writes to the console if the lexer is set in verbose loggingMode
+        /// </summary>
+        /// <param name="s">string that is ti be logged</param>
         private void Log(string s)
         {
-            if (_mode == LexerMode.Verbose)
+            if (_loggingMode == LexerLoggingMode.Verbose)
             {
                 Console.WriteLine(s);
             }
@@ -186,7 +220,10 @@ namespace CPSC411.Lexer
             return _tokens;
         }
 
-        public enum LexerMode
+        /// <summary>
+        /// Enum representing the logging 'volume' of the lexer
+        /// </summary>
+        public enum LexerLoggingMode
         {
             None,
             Verbose

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using CPSC411.Exceptions;
 using CPSC411.Lexer;
 
 namespace CPSC411
@@ -11,12 +12,16 @@ namespace CPSC411
         {
             // Loads input string from source file
             var sourceString = GetSourceFileText(args);
-            var lexer = new Lexer.Lexer(Lexer.Lexer.LexerMode.None);
 
+            // initializes lexer class and adds rules for minisculus tokens
+            var lexer = new Lexer.Lexer(Lexer.Lexer.LexerLoggingMode.None);
             AddRules(lexer);
-            sourceString = lexer.StripComments(sourceString);
-            var lineCount = 1;
 
+            // we are treating comments as preprocessor commands so we strip them here
+            sourceString = lexer.StripComments(sourceString);
+
+            // we are now ready to parse the tokens from the text.
+            var lineCount = 1; // used to track the line number, 1 indexed
             try
             {
                 // Iterate through all lines of the code and extract tokens from them.
@@ -25,8 +30,11 @@ namespace CPSC411
                     var subLine = line;
                     while (subLine.Length != 0)
                     {
+                        // this call pops off a token and returns the remaining string
+                        // token that was removed is added to the lexer's token selection
                         subLine = lexer.ParseToken(subLine, lineCount);
                     }
+                    // a line has been parsed, so remember we are working with the next line
                     lineCount ++;
                 }
 
@@ -36,7 +44,7 @@ namespace CPSC411
                     Console.Write($"[{token.StringRepresentation}], ");
                 }
             }
-            catch (InvalidDataException e)
+            catch (InvalidTokenException e)
             {
                 // Handle token parsing issues
                 Console.WriteLine($"Parse Error: {e.Message}");
