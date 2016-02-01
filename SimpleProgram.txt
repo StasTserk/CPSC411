@@ -1,0 +1,11 @@
+﻿% this file is a simple valid syntax program
+% demonstrates that normal looking cases are handled well
+
+begin
+	input x;
+	while (x) do
+	begin
+		write x;
+		x := x - 1;
+	end
+end

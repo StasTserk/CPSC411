@@ -54,13 +54,19 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="File1.txt">
+    <Content Include="BadToken.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="File2.txt">
+    <Content Include="Comments.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="File3.txt">
+    <Content Include="CommentsAndTokens.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SimpleProgram.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Tokens.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

@@ -1,0 +1,16 @@
+% This file demonstrates the various quirky behaviours expected of comments.
+
+first there are a few normal tokens /*then there are potential tokens 
+that should not be included*/ these tokens should be included
+
+corner case where comments/*may have no surrounding whitespace*/possibly cause two tokens to be joined
+
+/* now we have the case where comments may be nested
+/* this second level sould be excluded */
+ this should also be excluded */
+this should be fine though
+
+/* this next section shows the priority of single line comment sections
+where normally % this next bit would close the comment */
+and these tokens would show up, but because it's preceeded by the SLC char
+this is what closes the comment */
