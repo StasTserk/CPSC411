@@ -6,8 +6,9 @@
     /// </summary>
     public class Token : IToken
     {
-        public string StringRepresentation { get; set; }
+        public string StringRepresentation => string.IsNullOrEmpty(Contents) ? $"{Type}" : $"{Type}[{Contents}]";
         public int LineNumber { get; set; }
-        public TokenType TokenType { get; set; }
+        public string Contents { get; set; }
+        public TokenType Type { get; set; }
     }
 }

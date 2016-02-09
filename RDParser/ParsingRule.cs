@@ -24,7 +24,7 @@ namespace CPSC411.RDParser
             if (rule.Value == null)
             {
                 // invalid syntax!
-                throw new UnexpectedTokenException($"Unexpected token '{tokens.First().TokenType}' on line {tokens.FirstOrDefault()?.LineNumber}");
+                throw new UnexpectedTokenException($"Unexpected token '{tokens.First().Type}' on line {tokens.FirstOrDefault()?.LineNumber}");
             }
 
             return rule.Value.Invoke(_parent);

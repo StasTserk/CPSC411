@@ -63,7 +63,7 @@ namespace CPSC411.RDParser
 
         public bool TryMatch(TokenType tokenType)
         {
-            return _tokens.First().TokenType == tokenType;
+            return _tokens.First().Type == tokenType;
         }
 
         public bool TryMatch(string ruleName)
@@ -76,7 +76,7 @@ namespace CPSC411.RDParser
             LogIndented($"Consuming {tokenType}");
             if (!TryMatch(tokenType))
                 throw new UnexpectedTokenException(
-                    $"Unexpected token '{_tokens.FirstOrDefault()?.TokenType}' on line {_tokens.FirstOrDefault()?.LineNumber}, Expected '{tokenType}'");
+                    $"Unexpected token '{_tokens.FirstOrDefault()?.Type}' on line {_tokens.FirstOrDefault()?.LineNumber}, Expected '{tokenType}'");
             var removedToken = _tokens[0];
             _tokens.RemoveAt(0);
             return new Node {Contents = $"{removedToken.StringRepresentation}"};

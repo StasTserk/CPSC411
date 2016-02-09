@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Exceptions\InvalidTokenException.cs" />
     <Compile Include="Exceptions\UnexpectedTokenException.cs" />
+    <Compile Include="GraphVizGenerator.cs" />
     <Compile Include="Lexer\IToken.cs" />
     <Compile Include="Lexer\Lexer.cs" />
     <Compile Include="Lexer\Token.cs" />
