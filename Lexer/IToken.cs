@@ -7,5 +7,7 @@
     {
         string StringRepresentation { get; }
         int LineNumber { get; set; }
+
+        TokenType Type { get; set; }
     }
 }

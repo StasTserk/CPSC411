@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using CPSC411.Exceptions;
 using CPSC411.Lexer;
+using CPSC411.RDParser;
 
 namespace CPSC411
 {
@@ -15,7 +17,8 @@ namespace CPSC411
 
             // initializes lexer class and adds rules for minisculus tokens
             var lexer = new Lexer.Lexer(Lexer.Lexer.LexerLoggingMode.None);
-            AddRules(lexer);
+            
+            AddLexerRules(lexer);
 
             // we are treating comments as preprocessor commands so we strip them here
             sourceString = lexer.StripComments(sourceString);
@@ -50,7 +53,251 @@ namespace CPSC411
                 Console.WriteLine($"Parse Error: {e.Message}");
             }
 
-            Console.WriteLine();
+            
+            var rdp = new RecursiveDescentParser(lexer.GetTokens().ToList());
+            AddRdpRules(rdp);
+
+            var parentNode = rdp.ParseTokens();
+
+            Console.WriteLine(parentNode);
+        }
+
+        private static void AddRdpRules(RecursiveDescentParser parser)
+        {
+            parser.AddRule(
+                name: "base",
+                decider: rdp => true,
+                evaluator: rdp => rdp.InvokeRule("stmt"));
+
+            parser.AddRule( // if
+                name: "stmt",
+                decider: rdp => rdp.TryMatch(TokenType.If),
+                evaluator: rdp =>
+                {
+                    var node = new Node {Contents = "IF Statement"};
+                    node.AddChild(rdp.TryConsumeToken(TokenType.If));
+                    node.AddChild(rdp.InvokeRule("expr"));
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Then));
+                    node.AddChild(rdp.InvokeRule("stmt"));
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Else));
+                    node.AddChild(rdp.InvokeRule("stmt"));
+                    return node;
+                });
+
+            parser.AddRule( // while
+                name: "stmt",
+                decider: rdp => rdp.TryMatch(TokenType.While),
+                evaluator: rdp =>
+                {
+                    var node = new Node { Contents = "WHILE Statement" };
+                    node.AddChild(rdp.TryConsumeToken(TokenType.While));
+                    node.AddChild(rdp.InvokeRule("expr"));
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Do));
+                    node.AddChild(rdp.InvokeRule("stmt"));
+                    return node;
+                });
+
+            parser.AddRule( // input
+                name: "stmt",
+                decider: rpd => rpd.TryMatch(TokenType.Input),
+                evaluator: rdp =>
+                {
+                    var node = new Node { Contents = "INPUT Statement" };
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Input));
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Id));
+                    return node;
+                });
+
+            parser.AddRule( // assign
+                name: "stmt",
+                decider: rdp => rdp.TryMatch(TokenType.Id),
+                evaluator: rdp =>
+                {
+                    var node = new Node { Contents = "Assign Statement" };
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Id));
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Assign));
+                    node.AddChild(rdp.InvokeRule("expr"));
+                    return node;
+                });
+
+            parser.AddRule( // write
+                name: "stmt",
+                decider: rdp => rdp.TryMatch(TokenType.Write),
+                evaluator: rdp =>
+                {
+                    var node = new Node { Contents = "WRITE Statement" };
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Write));
+                    node.AddChild(rdp.InvokeRule("expr"));
+                    return node;
+                });
+
+            parser.AddRule( // begin
+                name: "stmt",
+                decider: rdp => rdp.TryMatch(TokenType.Begin),
+                evaluator: rdp =>
+                {
+                    var node = new Node { Contents = "BEGIN Statement" };
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Begin));
+                    node.AddChild(rdp.InvokeRule("stmtlist"));
+                    node.AddChild(rdp.TryConsumeToken(TokenType.End));
+                    return node;
+                });
+
+            parser.AddRule(
+                name: "stmtlist",
+                decider: rdp => rdp.TryMatch("stmt"),
+                evaluator: rdp =>
+                {
+                    var node = new Node { Contents = "Statement List" };
+                    node.AddChild(rdp.InvokeRule("stmt"));
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Semicolon));
+                    node.AddChild(rdp.InvokeRule("stmtlist"));
+                    return node;
+                });
+
+            parser.AddRule(
+                name: "stmtlist",
+                decider: rdp => !rdp.TryMatch("stmt"),
+                evaluator: rdp => new Node { Contents = "Null Statement" });
+
+            parser.AddRule(
+                name: "expr",
+                decider: rdp => rdp.TryMatch("term"),
+                evaluator: rdp =>
+                {
+                    var node = new Node { Contents = "Expr Statement" };
+                    node.AddChild(rdp.InvokeRule("term"));
+                    node.AddChild(rdp.InvokeRule("expr'"));
+                    return node;
+                });
+
+            parser.AddRule(
+                name: "expr'",
+                decider: rdp => rdp.TryMatch("addop"),
+                evaluator: rdp =>
+                {
+                    var node = new Node { Contents = "Expr' Statement" };
+                    node.AddChild(rdp.InvokeRule("addop"));
+                    node.AddChild(rdp.InvokeRule("term"));
+                    node.AddChild(rdp.InvokeRule("expr'"));
+                    return node;
+                });
+
+            parser.AddRule(
+                name: "expr'",
+                decider: rdp => !rdp.TryMatch("addop"),
+                evaluator: rdp => new Node {Contents = "Null expr"});
+
+            parser.AddRule(
+                name: "term",
+                decider: rdp => rdp.TryMatch("factor"),
+                evaluator: rdp =>
+                {
+                    var node = new Node { Contents = "Term statement" };
+                    node.AddChild(rdp.InvokeRule("factor"));
+                    node.AddChild(rdp.InvokeRule("term'"));
+                    return node;
+                });
+
+            parser.AddRule(
+                name: "term'",
+                decider: rdp => rdp.TryMatch("mulop"),
+                evaluator: rdp =>
+                {
+                    var node = new Node { Contents = "Term' statement" };
+                    node.AddChild(rdp.InvokeRule("mulop"));
+                    node.AddChild(rdp.InvokeRule("factor"));
+                    node.AddChild(rdp.InvokeRule("term'"));
+                    return node;
+                });
+
+            parser.AddRule(
+                name: "term'",
+                decider: rdp => !rdp.TryMatch("mulop"),
+                evaluator: rdp => new Node() {Contents = "Null term"});
+
+            parser.AddRule(
+                name: "mulop",
+                decider: rdp => rdp.TryMatch(TokenType.Mul),
+                evaluator: rdp =>
+                {
+                    var node = new Node { Contents = "MUL statement" };
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Mul));
+                    return node;
+                });
+
+            parser.AddRule(
+                name: "mulop",
+                decider: rdp => rdp.TryMatch(TokenType.Div),
+                evaluator: rdp =>
+                {
+                    var node = new Node { Contents = "DIV statement" };
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Div));
+                    return node;
+                });
+
+            parser.AddRule(
+                name: "addop",
+                decider: rdp => rdp.TryMatch(TokenType.Add),
+                evaluator: rdp =>
+                {
+                    var node = new Node { Contents = "ADD statement" };
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Add));
+                    return node;
+                });
+
+            parser.AddRule(
+                name: "addop",
+                decider: rdp => rdp.TryMatch(TokenType.Sub),
+                evaluator: rdp =>
+                {
+                    var node = new Node { Contents = "SUB statement" };
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Sub));
+                    return node;
+                });
+
+            parser.AddRule(
+                name: "factor",
+                decider: rdp => rdp.TryMatch(TokenType.LPar),
+                evaluator: rdp =>
+                {
+                    var node = new Node { Contents = "Factor statement" };
+                    node.AddChild(rdp.TryConsumeToken(TokenType.LPar));
+                    node.AddChild(rdp.InvokeRule("expr"));
+                    node.AddChild(rdp.TryConsumeToken(TokenType.RPar));
+                    return node;
+                });
+
+            parser.AddRule(
+                name: "factor",
+                decider: rdp => rdp.TryMatch(TokenType.Id),
+                evaluator: rdp =>
+                {
+                    var node = new Node { Contents = "Factor statement" };
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Id));
+                    return node;
+                });
+
+            parser.AddRule(
+                name: "factor",
+                decider: rdp => rdp.TryMatch(TokenType.Num),
+                evaluator: rdp =>
+                {
+                    var node = new Node { Contents = "Factor statement" };
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Num));
+                    return node;
+                });
+
+            parser.AddRule(
+                name: "factor",
+                decider: rdp => rdp.TryMatch(TokenType.Sub),
+                evaluator: rdp =>
+                {
+                    var node = new Node { Contents = "Factor statement" };
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Sub));
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Num));
+                    return node;
+                });
         }
 
         /// <summary>
@@ -59,10 +306,10 @@ namespace CPSC411
         /// </summary>
         /// <param name="args">Command line arguments</param>
         /// <returns>String representing the complete text of the file.</returns>
-        private static string GetSourceFileText(string [] args)
+        private static string GetSourceFileText(IReadOnlyList<string> args)
         {
             var fileName = "";
-            if (args.Length != 0)
+            if (args.Count != 0)
             {
                 fileName = $"{args[0]}";
             }
@@ -74,53 +321,53 @@ namespace CPSC411
             }
 
             Console.WriteLine($"Reading {fileName}");
-            return System.IO.File.ReadAllText(fileName).Trim();
+            return File.ReadAllText(fileName).Trim();
         }
 
         /// <summary>
         /// Adds all of the rules associated with assignment 1
         /// </summary>
         /// <param name="lexer">Lexer that is going to be performing the analysis</param>
-        private static void AddRules(Lexer.Lexer lexer)
+        private static void AddLexerRules(Lexer.Lexer lexer)
         {
             lexer.AddRule(@"if\b", 
-                s => new Token {StringRepresentation = "IF"})
+                s => new Token {StringRepresentation = "IF", Type = TokenType.If})
                 .AddRule(@"then\b", 
-                s => new Token {StringRepresentation = "THEN"})
+                s => new Token {StringRepresentation = "THEN", Type = TokenType.Then})
                 .AddRule(@"while\b", 
-                s => new Token {StringRepresentation = "WHILE"})
+                s => new Token {StringRepresentation = "WHILE", Type = TokenType.While})
                 .AddRule(@"do\b", 
-                s => new Token {StringRepresentation = "DO"})
+                s => new Token {StringRepresentation = "DO", Type = TokenType.Do})
                 .AddRule(@"input\b", 
-                s => new Token {StringRepresentation = "INPUT"})
+                s => new Token {StringRepresentation = "INPUT", Type = TokenType.Input})
                 .AddRule(@"else\b", 
-                s => new Token {StringRepresentation = "ELSE"})
+                s => new Token {StringRepresentation = "ELSE", Type = TokenType.Else})
                 .AddRule(@"begin\b", 
-                s => new Token {StringRepresentation = "BEGIN"})
+                s => new Token {StringRepresentation = "BEGIN", Type = TokenType.Begin})
                 .AddRule(@"end\b", 
-                s => new Token {StringRepresentation = "END"})
+                s => new Token {StringRepresentation = "END", Type = TokenType.End})
                 .AddRule(@"write\b", 
-                s => new Token {StringRepresentation = "WRITE"})
+                s => new Token {StringRepresentation = "WRITE", Type = TokenType.Write})
                 .AddRule(@"[a-zA-Z_][a-zA-Z0-9_]*", 
-                s => new Token {StringRepresentation = $"Id({s})"})
+                s => new Token {StringRepresentation = $"Id({s})", Type = TokenType.Id})
                 .AddRule(@"[\d]+", 
-                s => new Token {StringRepresentation = $"Num({s})"})
+                s => new Token {StringRepresentation = $"Num({s})", Type = TokenType.Num})
                 .AddRule(@"\+", 
-                s => new Token {StringRepresentation = "ADD"})
+                s => new Token {StringRepresentation = "ADD", Type = TokenType.Add})
                 .AddRule(@":=", 
-                s => new Token {StringRepresentation = "ASSIGN"})
+                s => new Token {StringRepresentation = "ASSIGN", Type = TokenType.Assign})
                 .AddRule(@"-", 
-                s => new Token {StringRepresentation = "SUB"})
+                s => new Token {StringRepresentation = "SUB", Type = TokenType.Sub})
                 .AddRule(@"\*", 
-                s => new Token {StringRepresentation = "MUL"})
+                s => new Token {StringRepresentation = "MUL", Type = TokenType.Mul})
                 .AddRule(@"/", 
-                s => new Token {StringRepresentation = "DIV"})
+                s => new Token {StringRepresentation = "DIV", Type = TokenType.Div})
                 .AddRule(@"\(", 
-                s => new Token {StringRepresentation = "LPAR"})
+                s => new Token {StringRepresentation = "LPAR", Type = TokenType.LPar})
                 .AddRule(@"\)", 
-                s => new Token {StringRepresentation = "RPAR"})
+                s => new Token {StringRepresentation = "RPAR", Type = TokenType.RPar})
                 .AddRule(@";", 
-                s => new Token {StringRepresentation = "SEMICOLON"});
+                s => new Token {StringRepresentation = "SEMICOLON", Type = TokenType.Semicolon});
         }
     }
 }
