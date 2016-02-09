@@ -1,8 +1,60 @@
-﻿%this file contains a bad token
+﻿-BEGIN
+-Statement List
+|  -INPUT Statement
+|  |  -INPUT
+|  |  -Id(x)
+|  -SEMICOLON
+|  -Statement List
+|  |  -WHILE Statement
+|  |  |  -WHILE
+|  |  |  -Expr Statement
+|  |  |  |  -Term statement
+|  |  |  |  |  -Factor statement
+|  |  |  |  |  |  -LPAR
+|  |  |  |  |  |  -Expr Statement
+|  |  |  |  |  |  |  -Term statement
+|  |  |  |  |  |  |  |  -Factor statement
+|  |  |  |  |  |  |  |  |  -Id(x)
+|  |  |  |  |  |  |  |  -Null term
+|  |  |  |  |  |  |  -Null expr
+|  |  |  |  |  |  -RPAR
+|  |  |  |  |  -Null term
+|  |  |  |  -Null expr
+|  |  |  -DO
+|  |  |  -BEGIN Statement
+|  |  |  |  -BEGIN
+|  |  |  |  -Statement List
+|  |  |  |  |  -WRITE Statement
+|  |  |  |  |  |  -WRITE
+|  |  |  |  |  |  -Expr Statement
+|  |  |  |  |  |  |  -Term statement
+|  |  |  |  |  |  |  |  -Factor statement
+|  |  |  |  |  |  |  |  |  -Id(x)
+|  |  |  |  |  |  |  |  -Null term
+|  |  |  |  |  |  |  -Null expr
+|  |  |  |  |  -SEMICOLON
+|  |  |  |  |  -Statement List
+|  |  |  |  |  |  -Assign Statement
+|  |  |  |  |  |  |  -Id(x)
+|  |  |  |  |  |  |  -ASSIGN
+|  |  |  |  |  |  |  -Expr Statement
+|  |  |  |  |  |  |  |  -Term statement
+|  |  |  |  |  |  |  |  |  -Factor statement
+|  |  |  |  |  |  |  |  |  |  -Id(x)
+|  |  |  |  |  |  |  |  |  -Null term
+|  |  |  |  |  |  |  |  -Expr' Statement
+|  |  |  |  |  |  |  |  |  -SUB statement
+|  |  |  |  |  |  |  |  |  |  -SUB
+|  |  |  |  |  |  |  |  |  -Term statement
+|  |  |  |  |  |  |  |  |  |  -Factor statement
+|  |  |  |  |  |  |  |  |  |  |  -Num(1)
+|  |  |  |  |  |  |  |  |  |  -Null term
+|  |  |  |  |  |  |  |  |  -Null expr
+|  |  |  |  |  |  -SEMICOLON
+|  |  |  |  |  |  -Null Statement
+|  |  |  |  -END
+|  |  -SEMICOLON
+|  |  -Null Statement
+-END
 
-if then else
-123 456
-
-??
-
-234 asdf
+Press any key to continue . . .

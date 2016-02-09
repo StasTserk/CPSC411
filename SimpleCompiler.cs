@@ -56,10 +56,15 @@ namespace CPSC411
             
             var rdp = new RecursiveDescentParser(lexer.GetTokens().ToList());
             AddRdpRules(rdp);
-
-            var parentNode = rdp.ParseTokens();
-
-            Console.WriteLine(parentNode);
+            try
+            {
+                var parentNode = rdp.ParseTokens();
+                Console.WriteLine(parentNode);
+            }
+            catch (UnexpectedTokenException e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         private static void AddRdpRules(RecursiveDescentParser parser)
@@ -331,43 +336,43 @@ namespace CPSC411
         private static void AddLexerRules(Lexer.Lexer lexer)
         {
             lexer.AddRule(@"if\b", 
-                s => new Token {StringRepresentation = "IF", Type = TokenType.If})
+                s => new Token {StringRepresentation = "IF", TokenType = TokenType.If})
                 .AddRule(@"then\b", 
-                s => new Token {StringRepresentation = "THEN", Type = TokenType.Then})
+                s => new Token {StringRepresentation = "THEN", TokenType = TokenType.Then})
                 .AddRule(@"while\b", 
-                s => new Token {StringRepresentation = "WHILE", Type = TokenType.While})
+                s => new Token {StringRepresentation = "WHILE", TokenType = TokenType.While})
                 .AddRule(@"do\b", 
-                s => new Token {StringRepresentation = "DO", Type = TokenType.Do})
+                s => new Token {StringRepresentation = "DO", TokenType = TokenType.Do})
                 .AddRule(@"input\b", 
-                s => new Token {StringRepresentation = "INPUT", Type = TokenType.Input})
+                s => new Token {StringRepresentation = "INPUT", TokenType = TokenType.Input})
                 .AddRule(@"else\b", 
-                s => new Token {StringRepresentation = "ELSE", Type = TokenType.Else})
+                s => new Token {StringRepresentation = "ELSE", TokenType = TokenType.Else})
                 .AddRule(@"begin\b", 
-                s => new Token {StringRepresentation = "BEGIN", Type = TokenType.Begin})
+                s => new Token {StringRepresentation = "BEGIN", TokenType = TokenType.Begin})
                 .AddRule(@"end\b", 
-                s => new Token {StringRepresentation = "END", Type = TokenType.End})
+                s => new Token {StringRepresentation = "END", TokenType = TokenType.End})
                 .AddRule(@"write\b", 
-                s => new Token {StringRepresentation = "WRITE", Type = TokenType.Write})
+                s => new Token {StringRepresentation = "WRITE", TokenType = TokenType.Write})
                 .AddRule(@"[a-zA-Z_][a-zA-Z0-9_]*", 
-                s => new Token {StringRepresentation = $"Id({s})", Type = TokenType.Id})
+                s => new Token {StringRepresentation = $"Id({s})", TokenType = TokenType.Id})
                 .AddRule(@"[\d]+", 
-                s => new Token {StringRepresentation = $"Num({s})", Type = TokenType.Num})
+                s => new Token {StringRepresentation = $"Num({s})", TokenType = TokenType.Num})
                 .AddRule(@"\+", 
-                s => new Token {StringRepresentation = "ADD", Type = TokenType.Add})
+                s => new Token {StringRepresentation = "ADD", TokenType = TokenType.Add})
                 .AddRule(@":=", 
-                s => new Token {StringRepresentation = "ASSIGN", Type = TokenType.Assign})
+                s => new Token {StringRepresentation = "ASSIGN", TokenType = TokenType.Assign})
                 .AddRule(@"-", 
-                s => new Token {StringRepresentation = "SUB", Type = TokenType.Sub})
+                s => new Token {StringRepresentation = "SUB", TokenType = TokenType.Sub})
                 .AddRule(@"\*", 
-                s => new Token {StringRepresentation = "MUL", Type = TokenType.Mul})
+                s => new Token {StringRepresentation = "MUL", TokenType = TokenType.Mul})
                 .AddRule(@"/", 
-                s => new Token {StringRepresentation = "DIV", Type = TokenType.Div})
+                s => new Token {StringRepresentation = "DIV", TokenType = TokenType.Div})
                 .AddRule(@"\(", 
-                s => new Token {StringRepresentation = "LPAR", Type = TokenType.LPar})
+                s => new Token {StringRepresentation = "LPAR", TokenType = TokenType.LPar})
                 .AddRule(@"\)", 
-                s => new Token {StringRepresentation = "RPAR", Type = TokenType.RPar})
+                s => new Token {StringRepresentation = "RPAR", TokenType = TokenType.RPar})
                 .AddRule(@";", 
-                s => new Token {StringRepresentation = "SEMICOLON", Type = TokenType.Semicolon});
+                s => new Token {StringRepresentation = "SEMICOLON", TokenType = TokenType.Semicolon});
         }
     }
 }

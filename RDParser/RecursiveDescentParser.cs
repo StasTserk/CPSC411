@@ -42,7 +42,7 @@ namespace CPSC411.RDParser
 
         private void LogIndented(string s)
         {
-            Console.WriteLine($"{new string(' ', _indent)}{s}");
+            //Console.WriteLine($"{new string(' ', _indent)}{s}");
         }
 
         public RecursiveDescentParser AddRule(string name, ProductionDecider decider, ProductionEvaluator evaluator)
@@ -63,7 +63,7 @@ namespace CPSC411.RDParser
 
         public bool TryMatch(TokenType tokenType)
         {
-            return _tokens.First().Type == tokenType;
+            return _tokens.First().TokenType == tokenType;
         }
 
         public bool TryMatch(string ruleName)
@@ -76,63 +76,10 @@ namespace CPSC411.RDParser
             LogIndented($"Consuming {tokenType}");
             if (!TryMatch(tokenType))
                 throw new UnexpectedTokenException(
-                    $"Unexpected token encountered! {_tokens.FirstOrDefault()}, Expected {tokenType}");
-
+                    $"Unexpected token '{_tokens.FirstOrDefault()?.TokenType}' on line {_tokens.FirstOrDefault()?.LineNumber}, Expected '{tokenType}'");
+            var removedToken = _tokens[0];
             _tokens.RemoveAt(0);
-            return new Node {Contents = tokenType.ToString()};
-        }
-
-
-        public void AddSampleRule()
-        {
-            this.AddRule(
-                name: "sample", 
-                decider: tokenList => tokenList.TryMatch(TokenType.If),
-                evaluator: parser =>
-                {
-                    var node = new Node {Contents = "IF Statement"};
-                    node.AddChild(parser.TryConsumeToken(TokenType.If));
-                    node.AddChild(parser.InvokeRule("Expression"));
-                    node.AddChild(parser.TryConsumeToken(TokenType.Then));
-                    node.AddChild(parser.InvokeRule("ThenExpression"));
-                    return node;
-                });
-        }
-    }
-
-    public class ParsingRule
-    {
-        private readonly RecursiveDescentParser _parent;
-        public string Name { get; set; }
-        private readonly IDictionary<ProductionDecider, ProductionEvaluator> _productions;
-
-        public ParsingRule(RecursiveDescentParser parent)
-        {
-            _parent = parent;
-            _productions = new Dictionary<ProductionDecider, ProductionEvaluator>();
-        }
-
-        public Node Invoke(IList<IToken> tokens)
-        {
-            var rule = _productions.FirstOrDefault(p => p.Key.Invoke(_parent));
-
-            if (rule.Value == null)
-            {
-                // invalid syntax!
-                throw new UnexpectedTokenException($"Unexpected token at {tokens.First()} on line {tokens.FirstOrDefault()?.LineNumber}");
-            }
-
-            return rule.Value.Invoke(_parent);
-        }
-
-        public void AddProduction(ProductionDecider decider, ProductionEvaluator evaluator)
-        {
-            _productions.Add(decider, evaluator);
-        }
-
-        public bool CanMatch()
-        {
-            return _productions.Any(p => p.Key.Invoke(_parent));
+            return new Node {Contents = $"{removedToken.StringRepresentation}"};
         }
     }
 }

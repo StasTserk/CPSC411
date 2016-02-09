@@ -8,6 +8,6 @@
     {
         public string StringRepresentation { get; set; }
         public int LineNumber { get; set; }
-        public TokenType Type { get; set; }
+        public TokenType TokenType { get; set; }
     }
 }
