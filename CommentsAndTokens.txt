@@ -1,0 +1,10 @@
+﻿% this file demosntrates that line numbers are preserved
+% for the purposes of error messages
+
+/* here is a multiline comment
+
+that can possibly throw off line numbers.
+
+*/
+
+the error occurs on line 10 ?????

@@ -1,0 +1,8 @@
+﻿%this file contains a bad token
+
+if then else
+123 456
+
+??
+
+234 asdf

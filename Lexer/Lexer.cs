@@ -102,6 +102,14 @@ namespace CPSC411.Lexer
             return sourceString;
         }
 
+        /// <summary>
+        /// Strips multi line comments by crawling though the source, keeping track of nesting
+        /// and newlines, replacing any outermost comment block with new lines corresponding to
+        /// the total number of lines the comment encompassed. this is done to preserve line
+        /// numbers for the tokenizing stage.
+        /// </summary>
+        /// <param name="sourceString">String representing the commented file</param>
+        /// <returns>String representing the source file with the comments removed.</returns>
         private string StripMultiLineComments(string sourceString)
         {
             var commentDepth = 0;
@@ -109,12 +117,12 @@ namespace CPSC411.Lexer
             var index = 1;
             var newlineCount = 0;
 
-
+            // iterate through every character in the string
             while (index < sourceString.Length)
             {
                 switch (sourceString[index])
                 {
-                    case '*':
+                    case '*': // we encountered a possible start of a comment block
                         if (sourceString[index - 1] == '/') // looks like it is
                         {
                             commentDepth ++;
@@ -126,7 +134,7 @@ namespace CPSC411.Lexer
                             }
                         }
                         break;
-                    case '/':
+                    case '/': // we encountered a possible end of a comment block
                         if (sourceString[index - 1] == '*') // looks like it is
                         {
                             commentDepth --;
@@ -143,9 +151,12 @@ namespace CPSC411.Lexer
                                     builder.Append('\n', newlineCount);
                                     builder.Append(" " + sourceString.Substring(index + 1));
                             
-                                    // 
+                                    // build the replaced string.
                                     sourceString = builder.ToString();
                                     index = commentStart+1;
+
+                                    // reset newline count for next block
+                                    newlineCount = 0;
                                     break;
                             }
                         }
