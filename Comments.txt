@@ -3,6 +3,6 @@ begin
 	while (x) do
 	begin
 		write x;
-		x := x - 1;
-	end;
+		x := x - 1
+	end
 end

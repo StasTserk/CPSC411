@@ -17,6 +17,9 @@ namespace CPSC411.RDParser
         }
 
         public IEnumerable<Node> Children => _children;
+        public bool IsTerminal { get; set; }
+        public string Data { get; set; }
+        public NodeType Type { get; set; }
 
         public override string ToString()
         {

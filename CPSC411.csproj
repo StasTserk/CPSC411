@@ -51,6 +51,7 @@
     <Compile Include="Lexer\Token.cs" />
     <Compile Include="Lexer\TokenType.cs" />
     <Compile Include="RDParser\Node.cs" />
+    <Compile Include="RDParser\NodeType.cs" />
     <Compile Include="RDParser\ParsingRule.cs" />
     <Compile Include="RDParser\RecursiveDescentParser.cs" />
     <Compile Include="SimpleCompiler.cs" />

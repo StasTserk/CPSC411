@@ -79,7 +79,13 @@ namespace CPSC411.RDParser
                     $"Unexpected token '{_tokens.FirstOrDefault()?.Type}' on line {_tokens.FirstOrDefault()?.LineNumber}, Expected '{tokenType}'");
             var removedToken = _tokens[0];
             _tokens.RemoveAt(0);
-            return new Node {Contents = $"{removedToken.StringRepresentation}"};
+            return new Node
+            {
+                Contents = $"{removedToken.StringRepresentation}",
+                IsTerminal = true,
+                Data = removedToken.Contents,
+                Type = NodeType.Terminal
+            };
         }
     }
 }

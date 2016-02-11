@@ -7,5 +7,5 @@ begin
 	begin
 		write x;
 		x := x - 1;
-	end;
+	end; % extra semicolon
 end

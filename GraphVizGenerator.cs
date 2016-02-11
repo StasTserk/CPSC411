@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Linq;
+using System.Text;
 using CPSC411.RDParser;
 
 namespace CPSC411
@@ -22,13 +23,12 @@ namespace CPSC411
         private void AddNodeText(Node node, StringBuilder builder, string prefix)
         {
             var prefixChar = 'a';
-            
-            builder.AppendLine($"  {prefix} [label=\"{node.Contents}\"]");
-            foreach (var child in node.Children)
+            var colour = node.IsTerminal ? " fillcolor=\"gold\" style=\"filled\"" : "";
+            builder.AppendLine($"  {prefix} [label=\"{node.Contents}\"{colour}]");
+            foreach (var child in node.Children)//.Where(child => !child.Contents.Contains("Null")))
             {
-                
                 builder.AppendLine($"  {prefix} -> {prefix}{prefixChar}");
-                AddNodeText(child, builder, prefix+prefixChar);
+                AddNodeText(child, builder, prefix + prefixChar);
                 prefixChar ++;
             }
         }
