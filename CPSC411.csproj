@@ -54,6 +54,7 @@
     <Compile Include="RDParser\NodeType.cs" />
     <Compile Include="RDParser\ParsingRule.cs" />
     <Compile Include="RDParser\RecursiveDescentParser.cs" />
+    <Compile Include="RulesModule.cs" />
     <Compile Include="SimpleCompiler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StackTranslator\StackMachineConverter.cs" />

@@ -15,12 +15,12 @@ namespace CPSC411.RDParser
     public class RecursiveDescentParser
     {
         private readonly ICollection<ParsingRule> _rules;
-        private readonly IList<IToken> _tokens;
+        private IList<IToken> _tokens;
         private int _indent = 0;
 
-        public RecursiveDescentParser(IList<IToken> tokens)
+        public RecursiveDescentParser()
         {
-            _tokens = tokens;
+            _tokens = new List<IToken>();
             _rules = new List<ParsingRule>();
         }
 
@@ -29,6 +29,10 @@ namespace CPSC411.RDParser
             return _rules.First().Invoke(_tokens);
         }
 
+        public void SetTokens(IEnumerable<IToken> tokens)
+        {
+            _tokens = tokens.ToList();
+        }
         public Node InvokeRule(string ruleName)
         {
             
