@@ -84,7 +84,8 @@ namespace CPSC411.RDParser
                 Contents = $"{removedToken.StringRepresentation}",
                 IsTerminal = true,
                 Data = removedToken.Contents,
-                Type = NodeType.Terminal
+                Type = NodeType.Terminal,
+                TerminalTokenType = removedToken.Type
             };
         }
     }

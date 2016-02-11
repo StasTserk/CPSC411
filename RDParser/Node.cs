@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using CPSC411.Lexer;
 
 namespace CPSC411.RDParser
 {
     public class Node
     {
-        private readonly ICollection<Node> _children = new List<Node>();
+        private readonly IList<Node> _children = new List<Node>();
 
         public string Contents { get; set; }
 
@@ -16,10 +17,11 @@ namespace CPSC411.RDParser
             return this;
         }
 
-        public IEnumerable<Node> Children => _children;
+        public IList<Node> Children => _children;
         public bool IsTerminal { get; set; }
         public string Data { get; set; }
         public NodeType Type { get; set; }
+        public TokenType TerminalTokenType { get; set; }
 
         public override string ToString()
         {

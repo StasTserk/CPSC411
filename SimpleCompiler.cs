@@ -5,6 +5,7 @@ using System.Linq;
 using CPSC411.Exceptions;
 using CPSC411.Lexer;
 using CPSC411.RDParser;
+using CPSC411.StackTranslator;
 
 namespace CPSC411
 {
@@ -65,6 +66,9 @@ namespace CPSC411
                 Console.WriteLine();
                 Console.WriteLine("Writing to graphviz format...");
                 File.WriteAllText("graphviz.dot", gen.GenerateGraphString(parentNode));
+
+                File.WriteAllText("StackCode.txt", 
+                    new StackMachineConverter().ConvertAst(parentNode));
             }
             catch (UnexpectedTokenException e)
             {
