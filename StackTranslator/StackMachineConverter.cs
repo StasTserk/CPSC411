@@ -7,7 +7,7 @@ namespace CPSC411.StackTranslator
 {
     public class StackMachineConverter
     {
-        private int labelInt;
+        private int _labelInt;
         
         public string ConvertAst(Node headNode)
         {
@@ -20,7 +20,7 @@ namespace CPSC411.StackTranslator
 
         private string GenerateLabel()
         {
-            return $"L{labelInt++}";
+            return $"L{_labelInt++}";
         }
 
         private void ConvertNode(Node node, StringBuilder builder)
@@ -110,9 +110,8 @@ namespace CPSC411.StackTranslator
             }
             else
             {
-                builder.AppendLine($"    kPUSH {node.Children[0].Data}");
+                builder.AppendLine($"    cPUSH {node.Children[0].Data}");
             }
-            return;
         }
 
         private void ProcessIf(Node headNode, StringBuilder builder)
@@ -127,6 +126,7 @@ namespace CPSC411.StackTranslator
             builder.AppendLine($"    JUMP {skipLabel}");
             builder.AppendLine($"{elseLabel}:");
             ConvertNode(headNode.Children[5], builder);
+            builder.AppendLine($"{skipLabel}:");
         }
 
         private void ProcessWhile(Node headNode, StringBuilder builder)
@@ -142,7 +142,7 @@ namespace CPSC411.StackTranslator
             ConvertNode(headNode.Children[3], builder); // do statement
             // skip back, and add follow label
             builder.AppendLine($"    JUMP {headLabel}");
-            builder.AppendLine($"{exitLabel}");
+            builder.AppendLine($"{exitLabel}:");
         }
     }
 }
