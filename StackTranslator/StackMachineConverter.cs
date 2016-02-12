@@ -94,23 +94,20 @@ namespace CPSC411.StackTranslator
 
         private void ProcessFactor(Node node, StringBuilder builder)
         {
-            if (node.Children.Count == 3) // [lpar] [expr] [rpar]
+            switch (node.Children.Count)
             {
-                ConvertNode(node.Children[1], builder);
-            }
-            else if (node.Children.Count == 2)
-            {
-                // [-] [num]
-                builder.AppendLine($"    cPUSH -{node.Children[1].Data}");
-            }
-            else if (node.Children[0].TerminalTokenType == TokenType.Id)
-            {
-                // [id] 
-                builder.AppendLine($"    rPUSH {node.Children[0].Data}");
-            }
-            else
-            {
-                builder.AppendLine($"    cPUSH {node.Children[0].Data}");
+                case 3:
+                    ConvertNode(node.Children[1], builder);
+                    break;
+                case 2:
+                    // [-] [num]
+                    builder.AppendLine($"    cPUSH -{node.Children[1].Data}");
+                    break;
+                default:
+                    builder.AppendLine(node.Children[0].TerminalTokenType == TokenType.Id
+                        ? $"    rPUSH {node.Children[0].Data}"
+                        : $"    cPUSH {node.Children[0].Data}");
+                    break;
             }
         }
 

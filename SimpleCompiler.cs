@@ -15,22 +15,29 @@ namespace CPSC411
             // Loads input string from source file
             var sourceString = GetSourceFileText(args);
 
-            // initializes lexer class and adds rules for minisculus tokens
+            // initializes lexer and RDP classes
             var lexer = new Lexer.Lexer(Lexer.Lexer.LexerLoggingMode.None);
             var rdp = new RecursiveDescentParser();
 
+            // adds rules to lexer and parser
             RulesModule.AddLexerRules(lexer);
             RulesModule.AddRdpRules(rdp);
 
             try
             {
+                Console.WriteLine("Parsing tokens from source...");
+                // parse tokens from source using lexer
                 ParseTokens(sourceString, lexer);
+                // generate AST from token list
+                Console.WriteLine("\n\nGenerating AST...");
                 Node rootNode = GenerateAst(rdp, lexer);
 
                 Console.WriteLine();
 
+                // generate AST visualization and compiled code
                 GenerateGraphvis(rootNode);
                 GenerateCompiledCode(rootNode);
+                Console.WriteLine("Success!");
             }
             catch (InvalidTokenException e)
             {
@@ -39,11 +46,18 @@ namespace CPSC411
             }
             catch (UnexpectedTokenException e)
             {
-                // syntax error
+                // unexpected token / syntax error
                 Console.WriteLine(e.Message);
             }
+            
         }
 
+        /// <summary>
+        /// Generates the abstract syntax tree based on the token list of the lexer
+        /// </summary>
+        /// <param name="rdp">Parser that will generate the AST</param>
+        /// <param name="lexer">Lexer containing the token list</param>
+        /// <returns></returns>
         private static Node GenerateAst(RecursiveDescentParser rdp, Lexer.Lexer lexer)
         {
             rdp.SetTokens(lexer.GetTokens());
@@ -51,6 +65,10 @@ namespace CPSC411
             return parentNode;
         }
 
+        /// <summary>
+        /// Generates the stack machine code defined in the assignment description
+        /// </summary>
+        /// <param name="parentNode">Root node of the AST</param>
         private static void GenerateCompiledCode(Node parentNode)
         {
             Console.WriteLine("Writing compiled code...");
@@ -58,6 +76,10 @@ namespace CPSC411
                 new StackMachineConverter().ConvertAst(parentNode));
         }
 
+        /// <summary>
+        /// Generates the graphviz representation of the AST
+        /// </summary>
+        /// <param name="parentNode">root node of the AST</param>
         private static void GenerateGraphvis(Node parentNode)
         {
             Console.WriteLine("Writing to graphviz format...");

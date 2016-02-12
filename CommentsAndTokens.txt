@@ -10,7 +10,7 @@ begin
     while i do
         begin
             final := (final * base);
-            i := i - 1
+            i := i - 1;
         end;
     write final
 end 

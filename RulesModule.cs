@@ -51,13 +51,43 @@ namespace CPSC411
                     s => new Token {Type = TokenType.Semicolon});
         }
 
+
+        /// <summary>
+        /// Adds the following grammar rules to the RDP parser passed into the function:
+        /// 
+        /// base        -> stmt
+        /// stmt        -> IF expr THEN stmt ELSE stmt
+        ///              | WHILE expr DO stmt
+        ///              | INPUT ID
+        ///              | ID ASSIGN expr
+        ///              | WRITE expr
+        ///              | BEGIN stmtlist END
+        /// stmtlist    -> stmt SEMICOLON stmtlist'
+        /// stmtlist'   -> stmt SEMICOLON stmtlist'
+        ///              | .
+        /// expr        -> term expr'
+        /// expr'       -> addop term expr'
+        ///              | .
+        /// term        -> factor term'
+        /// term'       -> mulop factor term'
+        ///              | .
+        /// factor      -> LPAR expr RPAR
+        ///              | ID
+        ///              | NUM
+        ///              | SUB NUM
+        /// addop       -> ADD | SUB
+        /// mulop       -> MUL | DIV
+        /// </summary>
+        /// <param name="parser">Parser that should accept the rules</param>
         public static void AddRdpRules(RecursiveDescentParser parser)
         {
+            // base -> stmt
             parser.AddRule(
                 name: "base",
                 decider: rdp => true,
                 evaluator: rdp => rdp.InvokeRule("stmt"));
 
+            // stmt -> IF expr THEN stmt ELSE stmt
             parser.AddRule( // if
                 name: "stmt",
                 decider: rdp => rdp.TryMatch(TokenType.If),
@@ -73,6 +103,7 @@ namespace CPSC411
                     return node;
                 });
 
+            //  stmt -> WHILE expr DO stmt
             parser.AddRule( // while
                 name: "stmt",
                 decider: rdp => rdp.TryMatch(TokenType.While),
@@ -86,6 +117,7 @@ namespace CPSC411
                     return node;
                 });
 
+            // stmt -> INPUT ID
             parser.AddRule( // input
                 name: "stmt",
                 decider: rpd => rpd.TryMatch(TokenType.Input),
@@ -97,6 +129,7 @@ namespace CPSC411
                     return node;
                 });
 
+            // stmt -> ID ASS expr
             parser.AddRule( // assign
                 name: "stmt",
                 decider: rdp => rdp.TryMatch(TokenType.Id),
@@ -109,6 +142,7 @@ namespace CPSC411
                     return node;
                 });
 
+            // stmt -> WRITE expr
             parser.AddRule( // write
                 name: "stmt",
                 decider: rdp => rdp.TryMatch(TokenType.Write),
@@ -120,6 +154,7 @@ namespace CPSC411
                     return node;
                 });
 
+            // stmt -> BEGIN stmtlist END
             parser.AddRule( // begin
                 name: "stmt",
                 decider: rdp => rdp.TryMatch(TokenType.Begin),
@@ -132,6 +167,7 @@ namespace CPSC411
                     return node;
                 });
 
+            // stmtlist -> stmt SEMICOLON stmtlist'
             parser.AddRule(
                 name: "stmtlist",
                 decider: rdp => rdp.TryMatch("stmt"),
@@ -139,27 +175,34 @@ namespace CPSC411
                 {
                     var node = new Node {Contents = "Statement List", Type = NodeType.StatementList};
                     node.AddChild(rdp.InvokeRule("stmt"));
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Semicolon));
                     node.AddChild(rdp.InvokeRule("stmtlist'"));
                     return node;
                 });
 
+            // Transformed rule
+            // stmtlist' -> stmt SEMICOLON stmtlist'
             parser.AddRule(
                 name: "stmtlist'",
-                decider: rdp => rdp.TryMatch(TokenType.Semicolon),
+                decider: rdp => rdp.TryMatch("stmt"),
                 evaluator: rdp =>
                 {
                     var node = new Node {Contents = "Statement List", Type = NodeType.MoreStatements};
-                    node.AddChild(rdp.TryConsumeToken(TokenType.Semicolon));
+                    
                     node.AddChild(rdp.InvokeRule("stmt"));
+                    node.AddChild(rdp.TryConsumeToken(TokenType.Semicolon));
                     node.AddChild(rdp.InvokeRule("stmtlist'"));
                     return node;
                 });
 
+            // Transformed rule
+            // stmtlist' -> .
             parser.AddRule(
                 name: "stmtlist'",
                 decider: rdp => !rdp.TryMatch(TokenType.Semicolon),
                 evaluator: rdp => new Node {Contents = "Null Statement", Type = NodeType.Null});
 
+            // expr -> term expr'
             parser.AddRule(
                 name: "expr",
                 decider: rdp => rdp.TryMatch("term"),
@@ -171,6 +214,8 @@ namespace CPSC411
                     return node;
                 });
 
+            // Transformed rule
+            // expr' -> addop term expr'
             parser.AddRule(
                 name: "expr'",
                 decider: rdp => rdp.TryMatch("addop"),
@@ -183,11 +228,14 @@ namespace CPSC411
                     return node;
                 });
 
+            // Transformed rule
+            // expr' -> .
             parser.AddRule(
                 name: "expr'",
                 decider: rdp => !rdp.TryMatch("addop"),
                 evaluator: rdp => new Node {Contents = "Null expr", Type = NodeType.Null});
 
+            // term -> factor term'
             parser.AddRule(
                 name: "term",
                 decider: rdp => rdp.TryMatch("factor"),
@@ -199,6 +247,8 @@ namespace CPSC411
                     return node;
                 });
 
+            // Transformed rule
+            // term' -> mulop factor term'
             parser.AddRule(
                 name: "term'",
                 decider: rdp => rdp.TryMatch("mulop"),
@@ -211,31 +261,38 @@ namespace CPSC411
                     return node;
                 });
 
+            // Transformed rule
+            // term' -> .
             parser.AddRule(
                 name: "term'",
                 decider: rdp => !rdp.TryMatch("mulop"),
                 evaluator: rdp => new Node {Contents = "Null term", Type = NodeType.Null});
 
+            // mulop -> MUL
             parser.AddRule(
                 name: "mulop",
                 decider: rdp => rdp.TryMatch(TokenType.Mul),
                 evaluator: rdp => rdp.TryConsumeToken(TokenType.Mul));
 
+            // mulop -> DIV
             parser.AddRule(
                 name: "mulop",
                 decider: rdp => rdp.TryMatch(TokenType.Div),
                 evaluator: rdp => rdp.TryConsumeToken(TokenType.Div));
 
+            // addop -> ADD
             parser.AddRule(
                 name: "addop",
                 decider: rdp => rdp.TryMatch(TokenType.Add),
                 evaluator: rdp => rdp.TryConsumeToken(TokenType.Add));
 
+            // addop -> SUB
             parser.AddRule(
                 name: "addop",
                 decider: rdp => rdp.TryMatch(TokenType.Sub),
                 evaluator: rdp => rdp.TryConsumeToken(TokenType.Sub));
 
+            // factor -> LPAR expr RPAR
             parser.AddRule(
                 name: "factor",
                 decider: rdp => rdp.TryMatch(TokenType.LPar),
@@ -248,6 +305,7 @@ namespace CPSC411
                     return node;
                 });
 
+            // factor -> ID
             parser.AddRule(
                 name: "factor",
                 decider: rdp => rdp.TryMatch(TokenType.Id),
@@ -258,6 +316,7 @@ namespace CPSC411
                     return node;
                 });
 
+            // factor -> NUM
             parser.AddRule(
                 name: "factor",
                 decider: rdp => rdp.TryMatch(TokenType.Num),
@@ -268,6 +327,7 @@ namespace CPSC411
                     return node;
                 });
 
+            // factor -> SUB NUM
             parser.AddRule(
                 name: "factor",
                 decider: rdp => rdp.TryMatch(TokenType.Sub),
