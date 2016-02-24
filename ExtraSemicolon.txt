@@ -1,0 +1,8 @@
+﻿% this program contains an extra seicolon
+
+begin
+    if (2 - 1) then
+        write 5;
+    else
+        write 4;
+end

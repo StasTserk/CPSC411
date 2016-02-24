@@ -1,0 +1,7 @@
+﻿%this program is missing an else
+begin
+    input x;
+    if x
+    then
+        write x;
+end

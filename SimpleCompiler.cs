@@ -62,6 +62,11 @@ namespace CPSC411
         {
             rdp.SetTokens(lexer.GetTokens());
             var parentNode = rdp.ParseTokens();
+            if (rdp.HasTokensRemaining)
+            {
+                throw new UnexpectedTokenException(
+                    $"Reached end of parse with tokens remaining! {rdp.NextToken.StringRepresentation} on line {rdp.NextToken.LineNumber}");
+            }
             return parentNode;
         }
 

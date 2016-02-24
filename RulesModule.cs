@@ -199,7 +199,7 @@ namespace CPSC411
             // stmtlist' -> .
             parser.AddRule(
                 name: "stmtlist'",
-                decider: rdp => !rdp.TryMatch(TokenType.Semicolon),
+                decider: rdp => !rdp.TryMatch("stmt"),
                 evaluator: rdp => new Node {Contents = "Null Statement", Type = NodeType.Null});
 
             // expr -> term expr'

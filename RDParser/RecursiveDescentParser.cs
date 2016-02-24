@@ -13,6 +13,9 @@ namespace CPSC411.RDParser
         private readonly ICollection<ParsingRule> _rules;
         private IList<IToken> _tokens;
 
+        public bool HasTokensRemaining => _tokens.Any();
+        public IToken NextToken => _tokens.First();
+
         public RecursiveDescentParser()
         {
             _tokens = new List<IToken>();

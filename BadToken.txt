@@ -1,3 +1,0 @@
-﻿begin
-	input x
-end

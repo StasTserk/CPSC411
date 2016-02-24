@@ -41,11 +41,14 @@ namespace CPSC411.StackTranslator
                     ProcessFactor(node, builder);
                     break;
                 case NodeType.Expression:
-                case NodeType.Term:
-                case NodeType.StatementList:
-                    // has the form [term] [expr']
+                case NodeType.Term: // has the form [term] [expr']
                     ConvertNode(node.Children[0], builder);
                     ConvertNode(node.Children[1], builder);
+                    break;
+                case NodeType.StatementList:
+                    // has the form [stmt] [;] [stmtlist']
+                    ConvertNode(node.Children[0], builder);
+                    ConvertNode(node.Children[2], builder);
                     break;
                 case NodeType.MoreExpression:
                     // of the form [addop] [term] [moreexpr]
@@ -53,7 +56,7 @@ namespace CPSC411.StackTranslator
                     ConvertNode(node.Children[1], builder); // term
                     builder.AppendLine( // postfix the add/sub
                         node.Children[0].TerminalTokenType == TokenType.Add ?
-                        "    OP1 +" : "    OP1 -");
+                        "    OP2 +" : "    OP2 -");
                     break;
                 case NodeType.MoreTerms:
                     // of the form [mulop] [factor] [moreterm]
@@ -61,7 +64,7 @@ namespace CPSC411.StackTranslator
                     ConvertNode(node.Children[1], builder); // term
                     builder.AppendLine( // postfix the add/sub
                         node.Children[0].TerminalTokenType == TokenType.Mul ?
-                        "    OP1 *" : "    OP1 /");
+                        "    OP2 *" : "    OP2 /");
                     // has the form 
                     break;
                 case NodeType.Terminal: // may not be needed
@@ -83,8 +86,8 @@ namespace CPSC411.StackTranslator
                     builder.AppendLine("    PRINT");
                     break;
                 case NodeType.MoreStatements:
-                    // of the form [;] [stmt] [morestmt]
-                    ConvertNode(node.Children[1], builder);
+                    // of the form [stmt] [;] [morestmt]
+                    ConvertNode(node.Children[0], builder);
                     ConvertNode(node.Children[2], builder);
                     break;
                 default:
